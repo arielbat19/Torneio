@@ -1,16 +1,12 @@
 package com.teste.pratico.desafios.Desafio.Tecnico.controller;
 
 import com.teste.pratico.desafios.Desafio.Tecnico.dtos.JogadorDTO;
-import com.teste.pratico.desafios.Desafio.Tecnico.entities.Jogador;
 import com.teste.pratico.desafios.Desafio.Tecnico.services.JogadorService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/jogadores")
