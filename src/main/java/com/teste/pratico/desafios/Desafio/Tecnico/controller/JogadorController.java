@@ -32,6 +32,12 @@ public class JogadorController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<JogadorDTO> buscarPorIdOuNome(@RequestParam String valor) {
+        JogadorDTO jogador = jogadorService.buscarPorIdOuNome(valor);
+        return ResponseEntity.ok(jogador);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<JogadorDTO> atualizar(@PathVariable Long id, @RequestBody JogadorDTO dto) {
         return jogadorService.atualizarJogador(id, dto)

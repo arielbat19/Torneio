@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,19 @@ public class JogadorService {
     public Optional<JogadorDTO> buscarPorId(Long id) {
         return jogadorRepository.findById(id)
                 .map(JogadorDTO::fromEntity);
+    }
+
+    public JogadorDTO buscarPorIdOuNome(String valor) {
+        try {
+            Long id = Long.parseLong(valor);
+            return jogadorRepository.findById(id)
+                    .map(j -> new JogadorDTO(j.getId(), j.getNome(), j.getEmail()))
+                    .orElseThrow(() -> new NoSuchElementException("Jogador não encontrado com ID: " + id));
+        } catch (NumberFormatException e) {
+            Jogador jogador = jogadorRepository.findByNomeIgnoreCase(valor)
+                    .orElseThrow(() -> new NoSuchElementException("Jogador não encontrado com nome: " + valor));
+            return new JogadorDTO(jogador.getId(), jogador.getNome(), jogador.getEmail());
+        }
     }
 
     public Optional<JogadorDTO> atualizarJogador(Long id, JogadorDTO dto) {
