@@ -21,7 +21,7 @@ public class Desafio {
     private String nome;
     private String descricao;
     private Integer pontuacaoMaxima;
-    private LocalDate dataExecucao;
+
 
     @ManyToOne
     @JoinColumn(name = "torneio_id")
