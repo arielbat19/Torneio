@@ -2,6 +2,8 @@ package com.teste.pratico.desafios.Desafio.Tecnico.services;
 
 import com.teste.pratico.desafios.Desafio.Tecnico.dtos.FibonacciRequest;
 import com.teste.pratico.desafios.Desafio.Tecnico.dtos.FibonacciResponse;
+import com.teste.pratico.desafios.Desafio.Tecnico.dtos.PalindromeRequest;
+import com.teste.pratico.desafios.Desafio.Tecnico.dtos.PalindromeResponse;
 import com.teste.pratico.desafios.Desafio.Tecnico.entities.Resultado;
 import com.teste.pratico.desafios.Desafio.Tecnico.repositories.JogadorRepository;
 import com.teste.pratico.desafios.Desafio.Tecnico.repositories.ResultadoDesafioRepository;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class DesafioService {
 
     private static final int PESO_FIBONACCI = 10;
+    private static final int PESO_PALINDROMO = 5;
 
     private final JogadorRepository jogadorRepository;
     private final TorneioRepository torneioRepository;
@@ -33,7 +36,6 @@ public class DesafioService {
 
         int resultado = calcularFibonacciIterativo(request.n());
 
-        // Salvar pontuação
         var resultadoDesafio = new Resultado();
         resultadoDesafio.setJogador(jogador);
         resultadoDesafio.setTorneio(torneio);
@@ -54,6 +56,32 @@ public class DesafioService {
             b = temp;
         }
         return b;
+    }
+
+    public PalindromeResponse executarPalindromo(PalindromeRequest request) {
+        var jogador = jogadorRepository.findById(request.jogadorId())
+                .orElseThrow(() -> new RuntimeException("Jogador não encontrado"));
+        var torneio = torneioRepository.findById(request.torneioId())
+                .orElseThrow(() -> new RuntimeException("Torneio não encontrado"));
+
+        boolean ehPalindromo = isPalindromo(request.texto());
+
+        if (ehPalindromo) {
+            var resultadoDesafio = new Resultado();
+            resultadoDesafio.setJogador(jogador);
+            resultadoDesafio.setTorneio(torneio);
+            resultadoDesafio.setPontuacao(PESO_PALINDROMO);
+            resultadoDesafio.setTipoDesafio("PALINDROMO");
+
+            resultadoRepository.save(resultadoDesafio);
+        }
+
+        return new PalindromeResponse(ehPalindromo, ehPalindromo ? PESO_PALINDROMO : 0);
+    }
+
+    private boolean isPalindromo(String texto) {
+        String normalizado = texto.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+        return new StringBuilder(normalizado).reverse().toString().equals(normalizado);
     }
 }
 
