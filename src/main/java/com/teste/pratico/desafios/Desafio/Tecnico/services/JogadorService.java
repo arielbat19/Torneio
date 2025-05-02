@@ -14,8 +14,11 @@ import java.util.stream.Collectors;
 @Service
 public class JogadorService {
 
-    @Autowired
-    private JogadorRepository jogadorRepository;
+    private final JogadorRepository jogadorRepository;
+
+    public JogadorService(JogadorRepository jogadorRepository) {
+        this.jogadorRepository = jogadorRepository;
+    }
 
     public JogadorDTO criarJogador(JogadorDTO dto) {
         Jogador jogador = dto.toEntity();
