@@ -33,8 +33,8 @@ public class DesafioController {
     }
 
     @PostMapping("/ordenar")
-    public ResponseEntity<List<Integer>> ordenarNumeros(@RequestBody SortingRequest request) {
-        List<Integer> resultado = desafioService.ordenarArray(request);
+    public ResponseEntity<SortingResponse> ordenarNumeros(@RequestBody SortingRequest request) {
+        SortingResponse resultado = desafioService.ordenarArray(request);
         return ResponseEntity.ok(resultado);
     }
 }

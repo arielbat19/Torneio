@@ -87,7 +87,7 @@ public class DesafioService {
         return new StringBuilder(normalizado).reverse().toString().equals(normalizado);
     }
 
-    public List<Integer> ordenarArray(SortingRequest request) {
+    public SortingResponse ordenarArray(SortingRequest request) {
         List<Integer> numeros = new ArrayList<>(request.numeros());
         boolean trocou = true;
         int n = numeros.size();
@@ -118,7 +118,7 @@ public class DesafioService {
 
         resultadoRepository.save(resultado);
 
-        return numeros;
+        return new SortingResponse(numeros, PESO_SORT);
     }
 }
 

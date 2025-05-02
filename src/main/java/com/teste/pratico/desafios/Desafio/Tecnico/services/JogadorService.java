@@ -50,12 +50,17 @@ public class JogadorService {
 
     public Optional<JogadorDTO> atualizarJogador(Long id, JogadorDTO dto) {
         return jogadorRepository.findById(id).map(jogadorExistente -> {
-            jogadorExistente.setNome(dto.nome());
-            jogadorExistente.setEmail(dto.email());
+            if (dto.nome() != null && !dto.nome().isBlank()) {
+                jogadorExistente.setNome(dto.nome());
+            }
+            if (dto.email() != null && !dto.email().isBlank()) {
+                jogadorExistente.setEmail(dto.email());
+            }
             Jogador atualizado = jogadorRepository.save(jogadorExistente);
             return JogadorDTO.fromEntity(atualizado);
         });
     }
+
 
     public boolean excluirJogador(Long id) {
         if (jogadorRepository.existsById(id)) {

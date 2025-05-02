@@ -3,10 +3,13 @@ package com.teste.pratico.desafios.Desafio.Tecnico.controller;
 import com.teste.pratico.desafios.Desafio.Tecnico.dtos.JogadorDTO;
 import com.teste.pratico.desafios.Desafio.Tecnico.services.JogadorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/jogadores")
@@ -26,30 +29,49 @@ public class JogadorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JogadorDTO> buscar(@PathVariable Long id) {
+    public ResponseEntity<?> buscar(@PathVariable Long id) {
         return jogadorService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body("Jogador com ID " + id + " não encontrado."));
     }
 
+
     @GetMapping("/buscar")
-    public ResponseEntity<JogadorDTO> buscarPorIdOuNome(@RequestParam String valor) {
-        JogadorDTO jogador = jogadorService.buscarPorIdOuNome(valor);
-        return ResponseEntity.ok(jogador);
+    public ResponseEntity<?> buscarPorIdOuNome(@RequestParam String valor) {
+        try {
+            JogadorDTO jogador = jogadorService.buscarPorIdOuNome(valor);
+            return ResponseEntity.ok(jogador);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Usuário não encontrado");
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<JogadorDTO> atualizar(@PathVariable Long id, @RequestBody JogadorDTO dto) {
-        return jogadorService.atualizarJogador(id, dto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody JogadorDTO dto) {
+        Optional<JogadorDTO> resultado = jogadorService.atualizarJogador(id, dto);
+
+        if (resultado.isPresent()) {
+            return ResponseEntity.ok(resultado.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Jogador com ID " + id + " não encontrado.");
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return jogadorService.excluirJogador(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<?> excluir(@PathVariable Long id) {
+        boolean excluido = jogadorService.excluirJogador(id);
+
+        if (excluido) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Jogador com ID " + id + " não encontrado.");
+        }
     }
+
 }
 

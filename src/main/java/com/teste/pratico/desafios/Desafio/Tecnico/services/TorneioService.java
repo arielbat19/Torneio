@@ -8,6 +8,8 @@ import com.teste.pratico.desafios.Desafio.Tecnico.repositories.TorneioRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,6 +26,7 @@ public class TorneioService {
     public TorneioDTO criar(String nome, Date data) {
         Torneio t = new Torneio();
         t.setNome(nome);
+        t.setData(data);
         t.setFinalizado(false);
         return toDTO(torneioRepository.save(t));
     }
