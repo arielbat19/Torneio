@@ -17,11 +17,15 @@ import java.util.stream.Collectors;
 @Service
 public class TorneioService {
 
-    @Autowired
-    private TorneioRepository torneioRepository;
+    private final TorneioRepository torneioRepository;
 
-    @Autowired
-    private JogadorRepository jogadorRepository;
+    private final JogadorRepository jogadorRepository;
+
+    public TorneioService(TorneioRepository torneioRepository, JogadorRepository jogadorRepository) {
+        this.torneioRepository = torneioRepository;
+        this.jogadorRepository = jogadorRepository;
+    }
+
 
     public TorneioDTO criar(String nome, Date data) {
         Torneio t = new Torneio();
