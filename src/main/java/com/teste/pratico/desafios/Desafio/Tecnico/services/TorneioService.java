@@ -38,6 +38,8 @@ public class TorneioService {
     public TorneioDTO adicionarJogador(Long torneioId, Long jogadorId) {
         Torneio t = torneioRepository.findById(torneioId).orElseThrow();
         Jogador j = jogadorRepository.findById(jogadorId).orElseThrow();
+
+        if (t.isFinalizado()) throw new RuntimeException("Torneio finalizado, não é possivel adicionar jogadores");
         t.getJogadores().add(j);
         return toDTO(torneioRepository.save(t));
     }
