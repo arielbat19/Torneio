@@ -9,3 +9,5 @@ COPY target/Desafio-Tecnico-0.0.1-SNAPSHOT.jar desafio-tecnico.jar
 
 # Comando para rodar o aplicativo
 CMD ["java", "-jar", "desafio-tecnico.jar"]
+
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "app.jar"]
