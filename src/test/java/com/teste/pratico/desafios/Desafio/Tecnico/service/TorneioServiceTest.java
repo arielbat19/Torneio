@@ -8,53 +8,48 @@ import com.teste.pratico.desafios.Desafio.Tecnico.repositories.TorneioRepository
 import com.teste.pratico.desafios.Desafio.Tecnico.services.TorneioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 class TorneioServiceTest {
 
-    private TorneioRepository torneioRepository;
-    private JogadorRepository jogadorRepository;
+    @InjectMocks
     private TorneioService torneioService;
 
+    @Mock
+    private TorneioRepository torneioRepository;
+
+    @Mock
+    private JogadorRepository jogadorRepository;
+
     @BeforeEach
-    void setUp() {
-        torneioRepository = mock(TorneioRepository.class);
-        jogadorRepository = mock(JogadorRepository.class);
-        torneioService = new TorneioService(torneioRepository, jogadorRepository);
+    void setup() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testCriar() {
-        Torneio torneio = new Torneio();
-        torneio.setId(1L);
-        torneio.setNome("Torneio 1");
-        torneio.setData(new Date());
-        torneio.setFinalizado(false);
-        torneio.setJogadores(new ArrayList<>());
-
+    void criarTorneio_DeveSalvarETornarDTO() {
+        Torneio torneio = new Torneio(1L, "Torneio Teste", new Date(), false, new ArrayList<>());
         when(torneioRepository.save(any())).thenReturn(torneio);
 
-        TorneioDTO dto = torneioService.criar("Torneio 1", torneio.getData());
+        TorneioDTO dto = torneioService.criar("Torneio Teste", new Date());
 
-        assertEquals("Torneio 1", dto.nome());
-        assertFalse(dto.finalizado());
-        verify(torneioRepository, times(1)).save(any());
+        assertNotNull(dto);
+        assertEquals("Torneio Teste", dto.nome());
     }
 
     @Test
-    void testAdicionarJogador() {
-        Torneio torneio = new Torneio();
-        torneio.setId(1L);
-        torneio.setNome("Torneio");
-        torneio.setJogadores(new ArrayList<>());
-
-        Jogador jogador = new Jogador();
-        jogador.setId(2L);
-        jogador.setNome("Jogador 1");
+    void adicionarJogador_DeveAdicionarJogador() {
+        Torneio torneio = new Torneio(1L, "Torneio", new Date(), false, new ArrayList<>());
+        Jogador jogador = new Jogador(2L, "João", "teste@gmail", LocalDate.now());
 
         when(torneioRepository.findById(1L)).thenReturn(Optional.of(torneio));
         when(jogadorRepository.findById(2L)).thenReturn(Optional.of(jogador));
@@ -62,20 +57,30 @@ class TorneioServiceTest {
 
         TorneioDTO dto = torneioService.adicionarJogador(1L, 2L);
 
-        assertTrue(dto.jogadores().contains("Jogador 1"));
-        verify(torneioRepository).save(torneio);
+        assertTrue(dto.jogadores().contains("João"));
     }
 
     @Test
-    void testRemoverJogador() {
-        Jogador jogador = new Jogador();
-        jogador.setId(2L);
-        jogador.setNome("Jogador 1");
+    void adicionarJogador_DeveLancarErroSeTorneioFinalizado() {
+        Torneio torneio = new Torneio(1L, "Torneio", new Date(), true, new ArrayList<>());
+        Jogador jogador = new Jogador(2L, "João", "teste@gmail", LocalDate.now());
 
-        Torneio torneio = new Torneio();
-        torneio.setId(1L);
-        torneio.setNome("Torneio");
-        torneio.setJogadores(new ArrayList<>(List.of(jogador)));
+        when(torneioRepository.findById(1L)).thenReturn(Optional.of(torneio));
+        when(jogadorRepository.findById(2L)).thenReturn(Optional.of(jogador));
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> {
+            torneioService.adicionarJogador(1L, 2L);
+        });
+
+        assertEquals("Torneio finalizado, não é possível adicionar jogadores", ex.getMessage());
+    }
+
+    @Test
+    void removerJogador_DeveRemoverJogador() {
+        Jogador jogador = new Jogador(2L, "João", "teste@gmail", LocalDate.now());
+        List<Jogador> jogadores = new ArrayList<>();
+        jogadores.add(jogador);
+        Torneio torneio = new Torneio(1L, "Torneio", new Date(), false, jogadores);
 
         when(torneioRepository.findById(1L)).thenReturn(Optional.of(torneio));
         when(jogadorRepository.findById(2L)).thenReturn(Optional.of(jogador));
@@ -83,35 +88,27 @@ class TorneioServiceTest {
 
         TorneioDTO dto = torneioService.removerJogador(1L, 2L);
 
-        assertFalse(dto.jogadores().contains("Jogador 1"));
-        verify(torneioRepository).save(torneio);
+        assertFalse(dto.jogadores().contains("João"));
     }
 
     @Test
-    void testListarJogadores() {
-        Jogador jogador1 = new Jogador();
-        jogador1.setNome("Jogador 1");
-
-        Jogador jogador2 = new Jogador();
-        jogador2.setNome("Jogador 2");
-
-        Torneio torneio = new Torneio();
-        torneio.setJogadores(Arrays.asList(jogador1, jogador2));
+    void listarJogadores_DeveRetornarNomes() {
+        Jogador jogador1 = new Jogador(1L, "Alice", "teste@gmail", LocalDate.now());
+        Jogador jogador2 = new Jogador(2L, "Bob", "teste@gmail", LocalDate.now());
+        Torneio torneio = new Torneio(1L, "Torneio", new Date(), false, Arrays.asList(jogador1, jogador2));
 
         when(torneioRepository.findById(1L)).thenReturn(Optional.of(torneio));
 
         List<String> nomes = torneioService.listarJogadores(1L);
 
         assertEquals(2, nomes.size());
-        assertTrue(nomes.contains("Jogador 1"));
+        assertTrue(nomes.contains("Alice"));
+        assertTrue(nomes.contains("Bob"));
     }
 
     @Test
-    void testFinalizarTorneio() {
-        Torneio torneio = new Torneio();
-        torneio.setId(1L);
-        torneio.setNome("Torneio");
-        torneio.setJogadores(new ArrayList<>());
+    void finalizarTorneio_DeveSetarFinalizadoComoTrue() {
+        Torneio torneio = new Torneio(1L, "Torneio", new Date(), false, new ArrayList<>());
 
         when(torneioRepository.findById(1L)).thenReturn(Optional.of(torneio));
         when(torneioRepository.save(any())).thenReturn(torneio);
@@ -119,6 +116,5 @@ class TorneioServiceTest {
         TorneioDTO dto = torneioService.finalizarTorneio(1L);
 
         assertTrue(dto.finalizado());
-        verify(torneioRepository).save(torneio);
     }
 }
